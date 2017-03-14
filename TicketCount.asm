@@ -15,6 +15,7 @@ data32right DWORD ?
 data32Count DWORD ?
 data32Iter DWORD ?
 data32Ten DWORD ?
+data32func DWORD ?
 data32Div DWORD ?
 ifmt db "%d",0
 buf db BSIZE dup (?)
@@ -31,11 +32,8 @@ start:
     mov edx, 1000
     mov ecx, 1000000
     nxt:
-        mov data32Iter, edx; int i, make a procedure then
-
+        mov data32Iter, edx; int i
         call CheckNums
-
-        ;make %10 and other, eax /= 10, edx = eax%10
         cmp eax, 0
         jz CountInc
         jmp AllInc
@@ -57,47 +55,40 @@ invoke ExitProcess, 0
 CheckNums proc
     mov data32left, 0
     mov eax, edx
-    mov data32Div, 100000
-    mov edx, 0
-    div data32Div
-    add data32left, eax; result of i/100000
-    mov eax, data32Iter
-    mov data32Div, 10000
-    mov edx, 0
-    div data32Div
-    mov edx, 0
-    div data32Ten
-    add data32left, edx ; result of (i/10000)%10
-    mov eax, data32Iter
     mov data32Div, 1000
     mov edx, 0
     div data32Div
-    mov edx, 0
-    div data32Ten
-    ;push edx ; result of (i/1000)%10
-    add data32left, edx
 
+    call GetSum
+    mov eax, data32func
+    mov data32left, eax
+    ;------------------------------
     mov data32right, 0
     mov eax, data32Iter
-    mov edx, 0
-    div data32Ten
-    add data32right, edx; result of i%10
-    mov eax, data32Iter
-    mov edx, 0
-    div data32Ten
-    mov edx, 0
-    div data32Ten
-    add data32right, edx; result of (i/10)%10
-    mov eax, data32Iter
-    mov data32Div, 100
-    mov edx, 0
-    div data32Div
-    mov edx, 0
-    div data32Ten
-    add data32right, edx ; result of (i/100)%10
+
+    call GetSum
+    mov eax, data32func
+    mov data32right, eax
 
     mov eax, data32right
     sub eax, data32left
     ret 
 CheckNums endp
+
+GetSum proc
+    mov data32func, 0 
+    mov edx, 0
+    div data32Ten
+    add data32func, edx; result of i%10
+    
+    mov edx, 0
+    div data32Ten
+    add data32func, edx; result of (i/10)%10
+
+    mov edx, 0
+    div data32Ten
+    add data32func, edx ; result of (i/100)%10
+ret
+GetSum endp
+
 end start
